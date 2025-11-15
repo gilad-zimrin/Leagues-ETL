@@ -4,24 +4,35 @@ import json
 import os
 from dotenv import load_dotenv
 
-API_URL = "https://v3.football.api-sports.io/leagues"
-OUTPUT_FILE = "football_api_sports.json"
-RUN_COUNT = 8
-
 load_dotenv()
 
-x_apisports_key = os.getenv("X_APISPORTS_KEY")
+RUN_COUNT = 3
 
-headers = {
-    'x-apisports-key': x_apisports_key
+all_apis = {
+    "football_api_sports": {
+        'url': os.getenv("FOOT_BALL_API_SPORTS"),
+        'output_file': os.getenv("FOOTBALL_API_SPORTS_FILE"),
+        'headers': {
+            'x-apisports-key': os.getenv("X_APISPORTS_KEY")
+        }
     }
+}
+
+current_server = "football_api_sports"
+# change this to change server
+
+API_URL = all_apis[current_server]['url']
+OUTPUT_FILE = all_apis[current_server]['output_file']
+headers = all_apis[current_server]['headers']
+
+
 
 
 async def fetch_json(session):
-    print(headers)
     async with session.get(API_URL, headers=headers) as resp:
-        print(resp)
-        return await resp.json()
+        print("Successfully received response")
+        data = await resp.json()
+        return data.get("response", [])
 
 
 def load_existing_data():
