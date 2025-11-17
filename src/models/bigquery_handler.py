@@ -43,7 +43,6 @@ class BigQueryHandler:
         Uses load_table_from_json
         """
         full_table_id = self._normalize_table(table_name)
-        print("table:", full_table_id)
 
         try:
             job = self.client.load_table_from_json(

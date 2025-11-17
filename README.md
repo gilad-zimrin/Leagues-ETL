@@ -2,6 +2,36 @@
 
 # תכנון
 
+
+### אופן הרצה
+
+הקוד נעזר בספרייה uv, שהיא ספריית package manager שמנהל את הספריות שהפרוייקט משתמש בהן, כמו גם את הגרסאות שלהן (בדומה לPoetry).
+
+הוראות כדי להריץ הפרוייקט (בpycharm אבל אפשר גם vs code באופן דומה):
+
+קודם, לא לקנפג interpreter לפרוייקט, נעשה את זה בעזרת uv.
+
+נריץ:
+
+pip install uv
+
+uv venv .venv
+
+.venv\Scripts\activate
+
+uv sync
+
+לאחר הפקודות האלו תהיה לנו תיקיית .venv עם כל הספריות שהפרוייקט תלוי בהן, נקנפג interpreter דרך הpycharm, נבחר באופציה existing interpreter, ונבחר את הקובץ שב-.venv\Scripts\python.exe בתור הinterpreter שלנו.
+
+לאחר מכן נריץ את הקובץ main והפרוייקט יתחיל לפעול.
+
+
+#### הערה:
+
+הייתי עסוק בדברים אחרים במקביל, לכן מצטער, אבל לא סיימתי את הפרוייקט.
+
+הגעתי למגבלת הודעות מול השרתhttps://v3.football.api-sports.io ויש לי עדיין באג בטרנספורמציה של team ללא standings שאני לא יכול לבדוק, אני מגיש בכל מקרה כי אני בכל מגיש באיחור ואני לא רוצה לעכב אתכם יותר ממה שכבר עיכבתי. 
+
 ## תיאור המשימה
 במשימה נדרש לתכנן וליצור ETL pipline על מנת לעכל, לסכם, לשמור ולהנגיש מידע על קבוצות בPremier League.
 
@@ -100,17 +130,18 @@ CREATE TABLE `footballleagues.team_info.team_info` (
     venue_city STRING,
     venue_capacity INT64,
     venue_surface STRING,
-    league_id INT64 NOT NULL,
-    league_name STRING NOT NULL,
-    league_country STRING NOT NULL,
-    rank INT64 NOT NULL,
-    points INT64 NOT NULL,
-    overall_wins INT64 NOT NULL,
-    overall_draws INT64 NOT NULL,
-    overall_loses INT64 NOT NULL,
-    overall_goals_for INT64 NOT NULL,
-    overall_goals_against INT64 NOT NULL
+    league_id INT64,
+    league_name STRING,
+    league_country STRING,
+    rank INT64,
+    points INT64,
+    overall_wins INT64,
+    overall_draws INT64,
+    overall_loses INT64,
+    overall_goals_for INT64,
+    overall_goals_against INT64
 );
+
 
 ```
 <div dir="rtl">
@@ -299,7 +330,7 @@ class FootballApiETL(BaseETL):
 
 #### מחלקת BigQueryHandler
 
-מחלקת עזר, שתפקידה לנהל את כלח הפעולות מול הBigQuery, על מנת לחלק סמכויות מה-ETL בצורה יותר נכונה והגיונית.
+מחלקת עזר, שתפקידה לנהל את כל הפעולות מול הBigQuery, על מנת לחלק סמכויות מה-ETL בצורה יותר נכונה והגיונית.
 
 </div>
 
@@ -332,6 +363,73 @@ class BigQueryHandler:
 - יחסית זול, בניגוד למתחרים כגון snowflake ו-redshift.
 - בנוי עם מקביליות - מספר גדול של לקוחות יכולים לגשת בו זמנית באין מפריע
 - מתאים לשרת שלנו, שרת שמכניס בקשות בbatch ומאפשר קריאה של כמויות עצומות של מידע בבת אחת
+
+
+#### שרת FastAPI
+
+המידע שנשמר בBigQuery מונגש ללקוחות בעזרת שרת FastAPI פשוט ומינימלי,
+כרגע יש בו ראוט אחד שמביא את כל המידע אבל בקלות אפשר להוסיף עוד ראוטים/פילטרים וכו
+
+
+</div>
+
+```python
+def create_app():
+    app = FastAPI()
+
+    app.state.bigquery = BigQueryHandler()
+
+    @app.get("/all_team_info")
+    def get_all_team_info():
+        return app.state.bigquery.get_all(f"{project_id}.{team_info_table}")
+
+    # Easy to make more querying/filtering routes
+
+    return app
+
+
+```
+<div dir="rtl">
+
+### טיפול בשגיאות
+
+כל הפונקציות המשמעותיות בקוד מכילות בלוק של try: except עם לוג תואם שמסביר באיזה פונקציה קראה השגיאה, ואם זה רלוונטי גם איזה שגיאה קרתה, לדוגמה:
+
+
+</div>
+
+```python
+    async def extract(self) -> Dict | List:
+        try:
+            async with ClientSession() as session:
+                async with session.get(self.teams_url, headers=self.headers) as response:
+                    logger.debug(f"Successfully received response from url {self.teams_url}", extra={
+                        'etl_instance_id': self.etl_instance_id
+                    })
+                    raw_teams_data: List[Dict[str, Dict[str, Any]]] = (await response.json()).get("response", [])
+
+
+                await asyncio.gather(*(self.extract_standing_by_team(team) for team in raw_teams_data))
+
+            return raw_teams_data
+
+        except (ClientError,):
+            logger.exception("A client error has occurred in extract", extra={
+                'etl_instance_id': self.etl_instance_id,
+            })
+            raise
+        except (Exception,):
+            logger.exception("An unexpected error has occurred in extract", extra={
+                'etl_instance_id': self.etl_instance_id,
+            })
+            raise
+
+
+```
+<div dir="rtl">
+אם היה לי יותר זמן, הייתי עושה wrapper שעוטף את כל הפונקציות האלו בtry: except ומכיל בתוכו את הלוגר שיתאר בקצרה איזה שגיאה קרתה באיזה פונקציה, על מנת לחסוך בכפל קוד.
+
+בנוסף, הייתי מסדר את קובץ הלוגר כך שעבור כל שגיאה שקורית, הוא ידפיס את השורה, פונקציה וקובץ של המיקום שבו קרתה השגיאה.
 
 
 </div>

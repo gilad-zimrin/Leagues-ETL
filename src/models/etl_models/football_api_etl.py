@@ -48,8 +48,6 @@ class FootballApiETL(BaseETL):
                     logger.debug(f"Successfully received response from url f'{self.standings_url}{team_id}'", extra={
                         'etl_instance_id': self.etl_instance_id
                     })
-                    print("lkjhvfsdlkjavdhl")
-                    print((await response.json()).get("response", []))
                     raw_data = (await response.json()).get("response", [])
                     raw_standing = raw_data[0].get("league", {}) if raw_data else []
                     raw_team["league"] = raw_standing
@@ -89,32 +87,34 @@ class FootballApiETL(BaseETL):
 
 
     def transform(self, raw_objects) -> List[Dict[str, Any]]:
-        processed_objects = []
-        for raw_object in raw_objects:
-            print('raw_object')
-            print(raw_object)
-            raw_standings = raw_object['league']['standings'][0][0] if raw_object['league'] else None
-            processed_objects.append(TeamInfo(
-                id=raw_object['team']['id'],
-                name=raw_object['team']['name'],
-                country=raw_object['team']['country'],
-                founded=raw_object['team']['founded'],
-                venue_name=raw_object['venue']['name'],
-                venue_address=raw_object['venue']['address'],
-                venue_city=raw_object['venue']['city'],
-                venue_capacity=raw_object['venue']['capacity'],
-                venue_surface=raw_object['venue']['surface'],
-                league_id=raw_object['league']['id'] if raw_object['league'] else None,
-                league_name=raw_object['league']['name'] if raw_object['league'] else None,
-                league_country=raw_object['league']['country'] if raw_object['league'] else None,
-                rank=raw_standings['rank'],
-                points=raw_standings['points'] if raw_standings else None,
-                overall_wins=raw_standings['all']['win'] if raw_standings else None,
-                overall_loses=raw_standings['all']['draw'] if raw_standings else None,
-                overall_draws=raw_standings['all']['lose'] if raw_standings else None,
-                overall_goals_against=raw_standings['all']['goals']['for'] if raw_standings else None,
-                overall_goals_for=raw_standings['all']['goals']['against'] if raw_standings else None,
-            ).model_dump())
+        try:
+            processed_objects = []
+            for raw_object in raw_objects:
+                raw_standings = raw_object['league']['standings'][0][0] if raw_object['league'] else None
+                processed_objects.append(TeamInfo(
+                    id=raw_object['team']['id'],
+                    name=raw_object['team']['name'],
+                    country=raw_object['team']['country'],
+                    founded=raw_object['team']['founded'],
+                    venue_name=raw_object['venue']['name'],
+                    venue_address=raw_object['venue']['address'],
+                    venue_city=raw_object['venue']['city'],
+                    venue_capacity=raw_object['venue']['capacity'],
+                    venue_surface=raw_object['venue']['surface'],
+                    league_id=raw_object['league']['id'] if raw_standings else None,
+                    league_name=raw_object['league']['name'] if raw_standings else None,
+                    league_country=raw_object['league']['country'] if raw_standings else None,
+                    rank=raw_standings['rank'],
+                    points=raw_standings['points'] if raw_standings else None,
+                    overall_wins=raw_standings['all']['win'] if raw_standings else None,
+                    overall_loses=raw_standings['all']['draw'] if raw_standings else None,
+                    overall_draws=raw_standings['all']['lose'] if raw_standings else None,
+                    overall_goals_against=raw_standings['all']['goals']['for'] if raw_standings else None,
+                    overall_goals_for=raw_standings['all']['goals']['against'] if raw_standings else None,
+                ).model_dump())
 
-        return processed_objects
+            return processed_objects
+        except (Exception,) as err:
+            logger.exception(f"An unexpected error occurred in transform {str(err)}")
+            raise
 

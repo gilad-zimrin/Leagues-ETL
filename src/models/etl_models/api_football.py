@@ -85,7 +85,6 @@ class APIFootballETL(BaseETL):
         processed_objects = []
 
         for raw_object in merged_teams:
-            print(raw_object)
             processed_objects.append(TeamInfo(
                 id=int(raw_object['team_key']),
                 name=raw_object['team_name'],

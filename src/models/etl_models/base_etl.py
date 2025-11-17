@@ -60,37 +60,37 @@ class BaseETL(ABC):
 
 
     async def execute(self):
-        # try:
-        logger.info("Started a new ETL instance", extra={
-            'etl_instance_id': self.etl_instance_id
-        })
+        try:
+            logger.info("Started a new ETL instance", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
 
-        raw_data = await self.extract()
-        logger.debug("Successfully extracted data", extra={
-            'etl_instance_id': self.etl_instance_id
-        })
+            raw_data = await self.extract()
+            logger.debug("Successfully extracted data", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
 
-        asyncio.create_task(self.save_raw_data(raw_data))
+            asyncio.create_task(self.save_raw_data(raw_data))
 
 
-        processed_objects = self.transform(raw_data)
-        logger.debug(f"Successfully transformed {processed_objects} rows into TeamInfo dict", extra={
-            'etl_instance_id': self.etl_instance_id
-        })
+            processed_objects = self.transform(raw_data)
+            logger.debug(f"Successfully transformed {processed_objects} rows into TeamInfo dict", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
 
-        self.load(processed_objects)
+            self.load(processed_objects)
 
-        logger.debug(f"Successfully loaded {processed_objects} rows into team_info table", extra={
-            'etl_instance_id': self.etl_instance_id
-        })
+            logger.debug(f"Successfully loaded {processed_objects} rows into team_info table", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
 
-        logger.info("Successfully finished ETL process", extra={
-            'etl_instance_id': self.etl_instance_id
-        })
-        # except (Exception,):
-        #     logger.exception("An unexpected error has occurred in execute", extra={
-        #         'etl_instance_id': self.etl_instance_id
-        #     })
+            logger.info("Successfully finished ETL process", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
+        except (Exception,):
+            logger.exception("An unexpected error has occurred in execute", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
 
 
 
