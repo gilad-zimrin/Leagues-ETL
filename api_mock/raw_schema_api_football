@@ -1,0 +1,108 @@
+Schema Teams:
+
+[
+  {
+    "team_key": "str",
+    "team_name": "str",
+    "team_country": "str",
+    "team_founded": "str",
+    "team_badge": "str",
+    "venue": {
+      "venue_name": "str",
+      "venue_address": "str",
+      "venue_city": "str",
+      "venue_capacity": "str",
+      "venue_surface": "str"
+    },
+    "players": [
+      {
+        "player_key": "int",
+        "player_id": "str",
+        "player_image": "str",
+        "player_name": "str",
+        "player_complete_name": "str",
+        "player_number": "str",
+        "player_country": "str",
+        "player_type": "str",
+        "player_age": "str",
+        "player_match_played": "str",
+        "player_goals": "str",
+        "player_yellow_cards": "str",
+        "player_red_cards": "str",
+        "player_injured": "str",
+        "player_substitute_out": "str",
+        "player_substitutes_on_bench": "str",
+        "player_assists": "str",
+        "player_birthdate": "str",
+        "player_is_captain": "str",
+        "player_shots_total": "str",
+        "player_goals_conceded": "str",
+        "player_fouls_committed": "str",
+        "player_tackles": "str",
+        "player_blocks": "str",
+        "player_crosses_total": "str",
+        "player_interceptions": "str",
+        "player_clearances": "str",
+        "player_dispossesed": "str",
+        "player_saves": "str",
+        "player_inside_box_saves": "str",
+        "player_duels_total": "str",
+        "player_duels_won": "str",
+        "player_dribble_attempts": "str",
+        "player_dribble_succ": "str",
+        "player_pen_comm": "str",
+        "player_pen_won": "str",
+        "player_pen_scored": "str",
+        "player_pen_missed": "str",
+        "player_passes": "str",
+        "player_passes_accuracy": "str",
+        "player_key_passes": "str",
+        "player_woordworks": "str",
+        "player_rating": "str"
+      }
+    ],
+  }
+ ]
+
+Schema Standings:
+
+[
+  {
+    "country_name": "str",
+    "league_id": "str",
+    "league_name": "str",
+    "team_id": "str",
+    "team_name": "str",
+    "overall_promotion": "str",
+    "overall_league_position": "str",
+    "overall_league_payed": "str",
+    "overall_league_W": "str",
+    "overall_league_D": "str",
+    "overall_league_L": "str",
+    "overall_league_GF": "str",
+    "overall_league_GA": "str",
+    "overall_league_PTS": "str",
+    "home_league_position": "str",
+    "home_promotion": "str",
+    "home_league_payed": "str",
+    "home_league_W": "str",
+    "home_league_D": "str",
+    "home_league_L": "str",
+    "home_league_GF": "str",
+    "home_league_GA": "str",
+    "home_league_PTS": "str",
+    "away_league_position": "str",
+    "away_promotion": "str",
+    "away_league_payed": "str",
+    "away_league_W": "str",
+    "away_league_D": "str",
+    "away_league_L": "str",
+    "away_league_GF": "str",
+    "away_league_GA": "str",
+    "away_league_PTS": "str",
+    "league_round": "str",
+    "team_badge": "str",
+    "fk_stage_key": "str",
+    "stage_name": "str"
+  }
+]

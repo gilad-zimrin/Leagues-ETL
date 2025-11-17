@@ -1,0 +1,87 @@
+Schema Teams:
+[
+  {
+    "team": {
+      "id": "int",
+      "name": "str",
+      "code": "str",
+      "country": "str",
+      "founded": "int",
+      "national": "bool",
+      "logo": "str"
+    },
+    "venue": {
+      "id": "int",
+      "name": "str",
+      "address": "str",
+      "city": "str",
+      "capacity": "int",
+      "surface": "str",
+      "image": "str"
+    }
+  }
+]
+
+Schema Standings:
+[
+  {
+    "league": {
+      "id": "int",
+      "name": "str",
+      "country": "str",
+      "logo": "str",
+      "flag": "str",
+      "season": "int",
+      "standings": [
+        [
+          {
+            "rank": "int",
+            "team": {
+              "id": "int",
+              "name": "str",
+              "logo": "str"
+            },
+            "points": "int",
+            "goalsDiff": "int",
+            "group": "str",
+            "form": "str",
+            "status": "str",
+            "description": "str",
+            "all": {
+              "played": "int",
+              "win": "int",
+              "draw": "int",
+              "lose": "int",
+              "goals": {
+                "for": "int",
+                "against": "int"
+              }
+            },
+            "home": {
+              "played": "int",
+              "win": "int",
+              "draw": "int",
+              "lose": "int",
+              "goals": {
+                "for": "int",
+                "against": "int"
+              }
+            },
+            "away": {
+              "played": "int",
+              "win": "int",
+              "draw": "int",
+              "lose": "int",
+              "goals": {
+                "for": "int",
+                "against": "int"
+              }
+            },
+            "update": "str"
+          }
+        ]
+      ]
+    }
+  }
+]
+

@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-FILE_PATH = os.getenv("FOOTBALL_API_SPORTS_FILE")
+FILE_PATH = 'api_football_teams.json'
 
 def extract_schema(value):
     """

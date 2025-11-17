@@ -5,8 +5,10 @@ requires-python = ">=3.12"
 
 dependencies = [
     "aiohttp>=3.13.2",
+    "apscheduler>=3.11.1",
     "deepdiff>=8.6.1",
     "fastapi>=0.121.2",
+    "google-cloud-bigquery>=3.38.0",
     "python-dotenv>=1.2.1",
     "uvicorn>=0.38.0",
 ]

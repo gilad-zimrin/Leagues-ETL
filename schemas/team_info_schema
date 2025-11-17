@@ -1,0 +1,145 @@
+{
+  "properties": {
+    "id": {
+      "title": "Id",
+      "type": "integer"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "country": {
+      "title": "Country",
+      "type": "string"
+    },
+    "founded": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Founded"
+    },
+    "venue_name": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Venue Name"
+    },
+    "venue_address": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Venue Address"
+    },
+    "venue_city": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Venue City"
+    },
+    "venue_capacity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Venue Capacity"
+    },
+    "venue_surface": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Venue Surface"
+    },
+    "league_id": {
+      "title": "League Id",
+      "type": "integer"
+    },
+    "league_name": {
+      "title": "League Name",
+      "type": "string"
+    },
+    "league_country": {
+      "title": "League Country",
+      "type": "string"
+    },
+    "rank": {
+      "title": "Rank",
+      "type": "integer"
+    },
+    "points": {
+      "title": "Points",
+      "type": "integer"
+    },
+    "overall_wins": {
+      "title": "Overall Wins",
+      "type": "integer"
+    },
+    "overall_draws": {
+      "title": "Overall Draws",
+      "type": "integer"
+    },
+    "overall_loses": {
+      "title": "Overall Loses",
+      "type": "integer"
+    },
+    "overall_goals_for": {
+      "title": "Overall Goals For",
+      "type": "integer"
+    },
+    "overall_goals_against": {
+      "title": "Overall Goals Against",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "country",
+    "founded",
+    "venue_name",
+    "venue_address",
+    "venue_city",
+    "venue_capacity",
+    "venue_surface",
+    "league_id",
+    "league_name",
+    "league_country",
+    "rank",
+    "points",
+    "overall_wins",
+    "overall_draws",
+    "overall_loses",
+    "overall_goals_for",
+    "overall_goals_against"
+  ],
+  "title": "TeamInfo",
+  "type": "object"
+}
