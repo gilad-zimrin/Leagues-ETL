@@ -6,22 +6,34 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-RUN_COUNT = 3
+RUN_COUNT = 1
+
+mock_request_action = os.getenv("MOCK_REQUEST_ACTION")
+
 
 all_apis = {
     "football_api_sports": {
-        'url': os.getenv("FOOT_BALL_API_SPORTS"),
-        'output_file': os.getenv("FOOTBALL_API_SPORTS_FILE"),
+        'host': os.getenv("FOOTBALL_API_SPORTS_HOST"),
+        'route': mock_request_action,
+        'output_file': f'{os.getenv("FOOTBALL_API_SPORTS_FILE")}_{mock_request_action}.json',
+        'parameters': f'?league={int(os.getenv("FOOTBALL_API_CURRENT_LEAGUE"))}&season={int(os.getenv("FOOTBALL_API_CURRENT_SEASON"))}',
         'headers': {
             'x-apisports-key': os.getenv("X_APISPORTS_KEY")
         }
+    },
+    "api_football": {
+        'host': os.getenv("API_FOOTBALL_HOST"),
+        'route': '',
+        'output_file': f'{os.getenv("API_FOOTBALL_SPORTS_FILE")}_{mock_request_action}.json',
+        'parameters': f'?action=get_{mock_request_action}&league_id={int(os.getenv("API_FOOTBALL_CURRENT_LEAGUE"))}&APIkey={os.getenv("API_FOOTBALL_TOKEN")}',
+        'headers': {}
     }
 }
 
 current_server = "football_api_sports"
 # change this to change server
 
-API_URL = all_apis[current_server]['url']
+api_url = f'{all_apis[current_server]['host']}{all_apis[current_server]['route']}{all_apis[current_server]['parameters']}'
 OUTPUT_FILE = all_apis[current_server]['output_file']
 headers = all_apis[current_server]['headers']
 
@@ -29,10 +41,10 @@ headers = all_apis[current_server]['headers']
 
 
 async def fetch_json(session):
-    async with session.get(API_URL, headers=headers) as resp:
-        print("Successfully received response")
+    async with session.get(api_url, headers=headers) as resp:
+        print(f"Successfully received response from url {api_url}")
         data = await resp.json()
-        return data.get("response", [])
+        return data
 
 
 def load_existing_data():

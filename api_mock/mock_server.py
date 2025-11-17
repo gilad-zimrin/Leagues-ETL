@@ -4,21 +4,29 @@ import os
 import random
 import uvicorn
 
-FILE_PATH = "football_api_sports.json"
+
 
 app = FastAPI()
 
 
-def load_data():
-    if not os.path.exists(FILE_PATH):
+def load_data(file_path):
+    if not os.path.exists(file_path):
         return []
-    with open(FILE_PATH, "r") as f:
+    with open(file_path, "r") as f:
         return json.load(f)
 
 
-@app.get("/leagues")
+@app.get("/football_api_teams")
 def get_mock_football_api_sports():
-    data = load_data()
+    data = load_data('football_api_sports_teams.json')
+    if not data:
+        raise HTTPException(status_code=404, detail="No data available")
+    return random.choice(data)
+
+
+@app.get("/football_api_standings")
+def get_mock_football_api_sports():
+    data = load_data('football_api_sports_standings.json')
     if not data:
         raise HTTPException(status_code=404, detail="No data available")
     return random.choice(data)
