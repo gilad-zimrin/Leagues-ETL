@@ -40,10 +40,6 @@ https://apifootball.com/
 - google-cloud-bigquery: הספרייה הפייתונית על מנת להשתמש בbigquery.
 - pydantic: ספרייה שמאפשר לנו להגדיר types של אובייקטים, ולבצע להם ולידציה פשוטה או מסובכת לפי הצרכים שלנו
 
-## Databases
-
-להוסיף
-
 
 ## תכנון המימוש
 
@@ -82,16 +78,16 @@ class TeamInfo(BaseModel):
     venue_city: Optional[StrictStr]
     venue_capacity: Optional[StrictInt]
     venue_surface: Optional[StrictStr]
-    league_id: StrictInt
-    league_name: StrictStr
-    league_country: StrictStr
-    rank: StrictInt
-    points: StrictInt
-    overall_wins: StrictInt
-    overall_draws: StrictInt
-    overall_loses: StrictInt
-    overall_goals_for: StrictInt
-    overall_goals_against: StrictInt
+    league_id: Optional[StrictInt]
+    league_name: Optional[StrictStr]
+    league_country: Optional[StrictStr]
+    rank: Optional[StrictInt]
+    points: Optional[StrictInt]
+    overall_wins: Optional[StrictInt]
+    overall_draws: Optional[StrictInt]
+    overall_loses: Optional[StrictInt]
+    overall_goals_for: Optional[StrictInt]
+    overall_goals_against: Optional[StrictInt]
 ```
 ```sql
 CREATE TABLE `footballleagues.team_info.team_info` (
@@ -122,6 +118,7 @@ CREATE TABLE `footballleagues.team_info.team_info` (
 ### מבנה הקוד:
 
 בקובץ ה-main נרשום את הscheduler שיתזמן את הקריאה להתחלת ה-ETL ואת הקריאה להפעלה של ה-app.
+במערך שלמעלה יש את כל הETL-ים עבור כל מקור מידע, ואת האינטרוול שהם ירוצו איתו (אפשר להפוך את זה למשתנים נפרדין במידת הצורך).
 
 </div>
 
@@ -165,7 +162,9 @@ async def run_scheduler():
 מטרת המחלקה היא להגדיר תהליך ETL גנרי עבור כל מקורות המידע שנשתמש בהם.
 כל מקור מידע יצור מחלקה שיורשת ממחלקת הבסיס הזאת, כך שהוא ישתמש בפונקציות load ו-execute של מחלקת הבסיס, ויממש בעצמו פונקציות extract ו-transform.
 
-לכל תהליך ETL יהיה etl_instance_id שיופיע בלוגים וישמש אותנו לעקוב אחר תהליך שלם
+לכל תהליך ETL יהיה etl_instance_id שיופיע בלוגים וישמש אותנו לעקוב אחר תהליך שלם.
+
+המחלקה הזאת תשמור על סטנדרט אחיד לכל מקורות המידע, ותדריך אותנו איזה פונקציות צריך ליצור עבור כל מקור מידע, כל שהוספה של מקורות מידע נוספים תהיה פשוטה.
 
 
 </div>
@@ -174,59 +173,82 @@ async def run_scheduler():
 class BaseETL(ABC):
     def __init__(self):
         self.etl_instance_id = uuid4()
+        self.bigquery_handler: BigQueryHandler = BigQueryHandler()
+
+    @property
+    @abstractmethod
+    def api_host(self):
+        pass
+
+    @property
+    @abstractmethod
+    def current_league_id(self):
+        pass
 
     @abstractmethod
     async def extract(self) -> Dict | List:
         pass
 
     @abstractmethod
-    def transform(self, raw_object):
+    def transform(self, raw_data):
         pass
 
-    async def load(self, processed_object):
-        """
-        Saving data to BigQuery
-        :param processed_object:
-        :return:
-        """
-        pass
 
-    def get_objects_list(self, raw_data) -> List[Any]:
-        pass
+    def load(self, rows: List[Dict], table_name: str = team_info_table):
+        """
+        Batch load a list of validated dicts into BigQuery.
+        """
+        if not rows:
+            return True
+
+        try:
+            self.bigquery_handler.insert_batch(table_name, rows)
+        except Exception as err:
+            logger.exception("An unexpected error has occurred on load function")
+            raise RuntimeError(f"Failed to load data into BigQuery: {err}") from err
+
 
     async def save_raw_data(self, raw_data):
         """
-        Saving raw data to BigQuery
+        Saving raw data to BigQuery or non-rational database for monitoring, if needed
         :return:
         """
         pass
 
-    def process_raw_object(self, raw_object):
-        processed_object = self.transform(raw_object)
-
-        self.load(processed_object)
-
 
     async def execute(self):
-        logger.info("Started a new ETL instance", extra={
-            'etl_instance_id': self.etl_instance_id
-        })
+        try:
+            logger.info("Started a new ETL instance", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
+    
+            raw_data = await self.extract()
+            logger.debug("Successfully extracted data", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
+    
+            asyncio.create_task(self.save_raw_data(raw_data))
+    
+    
+            processed_objects = self.transform(raw_data)
+            logger.debug(f"Successfully transformed {processed_objects} rows into TeamInfo dict", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
+    
+            self.load(processed_objects)
+    
+            logger.debug(f"Successfully loaded {processed_objects} rows into team_info table", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
+    
+            logger.info("Successfully finished ETL process", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
+        except (Exception,):
+            logger.exception("An unexpected error has occurred in execute", extra={
+                'etl_instance_id': self.etl_instance_id
+            })
 
-        raw_data = await self.extract()
-        logger.debug("Successfully extracted data", extra={
-            'etl_instance_id': self.etl_instance_id
-        })
-
-        asyncio.create_task(self.save_raw_data(raw_data))
-
-        objects_list = self.get_objects_list(raw_data)
-
-        for raw_object in objects_list:
-            self.process_raw_object(raw_object)
-            
-        logger.info("Successfully finished ETL process", extra={
-            'etl_instance_id': self.etl_instance_id
-        })
 
 ```
 <div dir="rtl">
@@ -234,6 +256,8 @@ class BaseETL(ABC):
 #### מחלקת SourceETL
 
 מחלקה שתירש ממחלקת הבסיס BaseETL ותממש את הפונקציות הייחודיות למקור המידע הספציפי הזה.
+
+תפקיד המחלקה זה להתאים את הETL הגנרי שלנו לכל מקור מידע ספציפי, זה מאפשר לנו להוסיף מקורות מידע חדשים מבלי לשנות את המקורות המידע הישנים, על מנת לא לפגוע בקוד "פרודי" שכבר נבדק ועובד.
 
 לדוגמא, עבור מקור המידע FootballAPI ניצור את:
 
@@ -273,14 +297,41 @@ class FootballApiETL(BaseETL):
 ```
 <div dir="rtl">
 
-.
+#### מחלקת BigQueryHandler
 
-.
+מחלקת עזר, שתפקידה לנהל את כלח הפעולות מול הBigQuery, על מנת לחלק סמכויות מה-ETL בצורה יותר נכונה והגיונית.
 
-.
+</div>
 
-.
+```python
+class BigQueryHandler:
+    """
+    BigQuery helper for:
+    - Batch inserts with load_table_from_json
+    - Query helpers (get_one, get_by_params, get_all)
+    """
 
-סוף
+    def __init__(self):
+        self.project_id = project_id
+        self.client = bigquery.Client()
+
+    def insert_batch(self, table_name: str, rows: list[dict]):
+        pass
+
+    def get_all(self, table_name: str):
+        pass
+
+
+```
+<div dir="rtl">
+
+#### היתרונות בלעבוד עם BigQuery:
+
+- המידע נשמר לפי עמודות, אם יש לנו מאות שדות ואנחנו מבקשים רק 5, בקשות על כמויות עצומות של מידע יפעלו מאוד במהירות.
+- שרת חיצוני - התחזוקה והניהול שלו לא באחריותנו.
+- יחסית זול, בניגוד למתחרים כגון snowflake ו-redshift.
+- בנוי עם מקביליות - מספר גדול של לקוחות יכולים לגשת בו זמנית באין מפריע
+- מתאים לשרת שלנו, שרת שמכניס בקשות בbatch ומאפשר קריאה של כמויות עצומות של מידע בבת אחת
+
 
 </div>

@@ -13,13 +13,13 @@ class TeamInfo(BaseModel):
     venue_city: Optional[StrictStr]
     venue_capacity: Optional[StrictInt]
     venue_surface: Optional[StrictStr]
-    league_id: StrictInt
-    league_name: StrictStr
-    league_country: StrictStr
-    rank: StrictInt
-    points: StrictInt
-    overall_wins: StrictInt
-    overall_draws: StrictInt
-    overall_loses: StrictInt
-    overall_goals_for: StrictInt
-    overall_goals_against: StrictInt
+    league_id: Optional[StrictInt]
+    league_name: Optional[StrictStr]
+    league_country: Optional[StrictStr]
+    rank: Optional[StrictInt]
+    points: Optional[StrictInt]
+    overall_wins: Optional[StrictInt]
+    overall_draws: Optional[StrictInt]
+    overall_loses: Optional[StrictInt]
+    overall_goals_for: Optional[StrictInt]
+    overall_goals_against: Optional[StrictInt]

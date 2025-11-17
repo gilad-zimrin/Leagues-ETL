@@ -1,11 +1,11 @@
 import asyncio
 from abc import ABC, abstractmethod
 from os import getenv
-from typing import List, Any, Dict
+from typing import List, Dict
 from uuid import uuid4
 
-from models.big_query_handler import BigQueryHandler
-from utils.logger import logger
+from src.models.bigquery_handler import BigQueryHandler
+from src.utils.logger import logger
 from dotenv import load_dotenv
 
 load_dotenv()

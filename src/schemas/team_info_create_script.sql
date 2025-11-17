@@ -1,0 +1,21 @@
+CREATE TABLE `footballleagues.team_info.team_info` (
+    id INT64 NOT NULL,
+    name STRING NOT NULL,
+    country STRING NOT NULL,
+    founded INT64,
+    venue_name STRING,
+    venue_address STRING,
+    venue_city STRING,
+    venue_capacity INT64,
+    venue_surface STRING,
+    league_id INT64,
+    league_name STRING,
+    league_country STRING,
+    rank INT64,
+    points INT64,
+    overall_wins INT64,
+    overall_draws INT64,
+    overall_loses INT64,
+    overall_goals_for INT64,
+    overall_goals_against INT64
+);

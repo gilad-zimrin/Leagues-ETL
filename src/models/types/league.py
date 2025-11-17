@@ -1,6 +1,6 @@
 from pydantic import BaseModel, StrictInt, StrictStr
 
-from models.types.standing import Standing
+from src.models.types.standing import Standing
 
 
 class League(BaseModel):

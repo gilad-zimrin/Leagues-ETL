@@ -9,7 +9,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app import app
 from models.etl_models.api_football import APIFootballETL
 from models.etl_models.football_api_etl import FootballApiETL
-from utils.logger import logger
+from src.utils.logger import logger
 
 scheduler_interval_minutes = int(getenv("SCHEDULER_INTERVAL_MINUTES", default=60))
 

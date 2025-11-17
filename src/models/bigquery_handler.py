@@ -2,7 +2,7 @@ from os import getenv
 
 from google.cloud import bigquery
 from google.api_core.exceptions import GoogleAPIError
-from utils.logger import logger
+from src.utils.logger import logger
 from dotenv import load_dotenv
 
 load_dotenv()

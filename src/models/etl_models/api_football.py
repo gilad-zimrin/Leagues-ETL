@@ -4,9 +4,9 @@ from typing import Dict, List, Any
 from aiohttp import ClientSession, ClientError
 from dotenv import load_dotenv
 
-from models.etl_models.base_etl import BaseETL
-from models.types.team_info import TeamInfo
-from utils.logger import logger
+from src.models.etl_models.base_etl import BaseETL
+from src.models.types.team_info import TeamInfo
+from src.utils.logger import logger
 
 load_dotenv()
 
@@ -38,14 +38,12 @@ class APIFootballETL(BaseETL):
                     raw_teams_data: List[Dict[str, Dict[str, Any]]] = await response.json()
                     [raw_team.pop('players') for raw_team in raw_teams_data]
 
-                    print(raw_teams_data)
 
                 async with session.get(self.standings_url) as response:
                     logger.debug(f"Successfully received response from url {self.teams_url}", extra={
                         'etl_instance_id': self.etl_instance_id
                     })
                     raw_standings_data: List[Dict[str, Dict[str, Any]]] = await response.json()
-                    print(raw_standings_data)
 
 
             return {

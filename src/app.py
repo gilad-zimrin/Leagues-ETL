@@ -3,7 +3,7 @@ from os import getenv
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from models.big_query_handler import BigQueryHandler
+from models.bigquery_handler import BigQueryHandler
 
 load_dotenv()
 
